@@ -1,0 +1,48 @@
+trigger:
+- main
+
+pool:
+  name: Demo
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: BuildAndPushNodeApp
+  displayName: 'Build and Push Node.js App'
+  steps:
+  - task: Docker@2
+    inputs:
+      command: 'build'
+      containerRegistry: 'mydemo1477' # Replace with your container registry service connection
+      repository: 'npm'
+      dockerfile: 'npm/Dockerfile'
+      tags: |
+        $(Build.BuildId)
+
+  - task: Docker@2
+    inputs:
+      command: 'push'
+      containerRegistry: 'mydemo1477'
+      repository: 'npm'
+      tags: |
+        $(Build.BuildId)
+
+- job: BuildAndPushPythonApp
+  displayName: 'Build and Push Python App'
+  dependsOn: BuildAndPushNodeApp
+  steps:
+  - task: Docker@2
+    inputs:
+      command: 'build'
+      containerRegistry: 'mydemo1477' # Replace with your container registry service connection
+      repository: 'Python'
+      dockerfile: 'python/Dockerfile'
+      tags: |
+        $(Build.BuildId)
+
+  - task: Docker@2
+    inputs:
+      command: 'push'
+      containerRegistry: 'mydemo1477'
+      repository: 'Python'
+      tags: |
+        $(Build.BuildId)
